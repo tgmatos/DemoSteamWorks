@@ -3,6 +3,7 @@ const raylib = @import("src/raylib/build.zig");
 const zig_steamworks = @import("src/zig-steamworks/build.zig");
 
 pub fn addLibraryPath(compile: *std.build.Step.Compile) void {
+    //std.debug.print("\n\n\nOS: {any}", .{compile.target.os_tag.?});
     if (compile.target.os_tag != null and compile.target.os_tag.? == .macos) {
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/osx/libsteam_api.dylib" }, "libsteam_api.dylib").step);
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib" }, "libsdkencryptedappticket.dylib").step);
@@ -14,6 +15,7 @@ pub fn addLibraryPath(compile: *std.build.Step.Compile) void {
         compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/win64" });
         compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/win64" });
     } else {
+        std.debug.print("\n\nEntrou no else\n", .{});
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/linux64/libsteam_api.so" }, "libsteam_api.so").step);
         compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so" }, "libsdkencryptedappticket.so").step);
         compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/linux64" });
@@ -72,8 +74,13 @@ pub fn build(b: *std.Build) void {
 
     addLibraryPath(lib);
 
-    lib.linkSystemLibrary("sdkencryptedappticket");
-    lib.linkSystemLibrary("steam_api");
+    if (lib.target.os_tag != null and lib.target.os_tag.? == .windows) {
+        lib.linkSystemLibrary("sdkencryptedappticket64");
+        lib.linkSystemLibrary("steam_api64");
+    } else {
+        lib.linkSystemLibrary("sdkencryptedappticket");
+        lib.linkSystemLibrary("steam_api");
+    }
 
     lib.addIncludePath(.{ .path = "src/zig-steamworks/steamworks/public/steam" });
     lib.addCSourceFiles(&.{"src/zig-steamworks/src/steam.cpp"}, flagContainer.items);
