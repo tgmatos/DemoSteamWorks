@@ -3,10 +3,23 @@ const raylib = @import("src/raylib/build.zig");
 const zig_steamworks = @import("src/zig-steamworks/build.zig");
 
 pub fn addLibraryPath(compile: *std.build.Step.Compile) void {
-    compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/linux64/libsteam_api.so" }, "libsteam_api.so").step);
-    compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so" }, "libsdkencryptedappticket.so").step);
-    compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/linux64" });
-    compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/linux64" });
+    if (compile.target.os_tag != null and compile.target.os_tag.? == .macos) {
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/osx/libsteam_api.dylib" }, "libsteam_api.dylib").step);
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/osx/libsdkencryptedappticket.dylib" }, "libsdkencryptedappticket.dylib").step);
+        compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/osx" });
+        compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/osx" });
+    } else if (compile.target.os_tag != null and compile.target.os_tag.? == .windows) {
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/win64/sdkencryptedappticket64.dll" }, "sdkencryptedappticket64.dll").step);
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/win64/steam_api64.dll" }, "steam_api64.dll").step);
+        compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/win64" });
+        compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/win64" });
+    } else {
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/linux64/libsteam_api.so" }, "libsteam_api.so").step);
+        compile.step.dependOn(&compile.step.owner.addInstallBinFile(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/linux64/libsdkencryptedappticket.so" }, "libsdkencryptedappticket.so").step);
+        compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/public/steam/lib/linux64" });
+        compile.addLibraryPath(.{ .path = "src/zig-steamworks/steamworks/redistributable_bin/linux64" });
+        // instructs the binary to load libraries from the local path
+    }
 }
 
 // Although this function looks imperative, note that its job is to
