@@ -20,22 +20,35 @@ pub fn main() !void {
     steamworks.SteamClient().SetWarningMessageHook(SteamAPIDebugTextHook);
     defer steamworks.SteamAPI_Shutdown();
 
-    std.debug.print("User {?}\n", .{steamworks.SteamUser().GetSteamID()});
+    var id = steamworks.SteamUser().GetSteamID();
+    std.debug.print("User {d}\n", .{id});
+
+    var name = steamworks.SteamFriends().GetPersonaName();
+
+    std.debug.print("Type: {any}\nName: {s}\n", .{ @TypeOf(name), name });
 
     raylib.SetConfigFlags(raylib.ConfigFlags{ .FLAG_WINDOW_RESIZABLE = true });
-    raylib.InitWindow(800, 800, "hello world!");
+    raylib.InitWindow(500, 500, "Hello World");
     raylib.SetTargetFPS(60);
 
     defer raylib.CloseWindow();
 
+    var x: i32 = 0;
+    var y: i32 = 0;
+
     while (!raylib.WindowShouldClose()) {
+        if (x < 250) {
+            x += 1;
+            y += 1;
+        }
+
         raylib.BeginDrawing();
         defer raylib.EndDrawing();
 
         raylib.ClearBackground(raylib.BLACK);
         raylib.DrawFPS(10, 10);
 
-        raylib.DrawText("hello world!", 100, 100, 20, raylib.YELLOW);
+        raylib.DrawText(name, x, y, 20, raylib.YELLOW);
     }
 }
 
