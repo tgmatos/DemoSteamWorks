@@ -1,3 +1,6 @@
 [submodule "src/raylib"]
 	path = src/raylib
 	url = https://github.com/ryupold/raylib.zig
+[submodule "src/zig-steamworks"]
+	path = src/zig-steamworks
+	url = https://github.com/menduz/zig-steamworks
